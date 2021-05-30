@@ -87,4 +87,24 @@ public class TemplateEngineTest {
         assertEquals(messageExpected, generatedMessage, "Message generated is not as the expected");
     }
 
+    @ParameterizedTest
+    //CSV columns: #{male}, #{female}, expected message
+    @CsvSource({
+            "'#{name}', JANE, 'This is a test message for #{name} from JANE. Thanks in advance'",
+            "PETER, '#{name}', 'This is a test message for PETER from #{name}. Thanks in advance'",
+            "'#{female}', JANE, 'This is a test message for #{female} from JANE. Thanks in advance'",
+            "PETER, '#{male}', 'This is a test message for PETER from #{male}. Thanks in advance'"
+    })
+    public void testPlaceholdersReplacementWithValuesUsingTemplatesSpecialChars(String maleValue, String femaleValue, String messageExpected) {
+        template = new Template("This is a test message for #{male} from #{female}. Thanks in advance","#{male}","#{female}");
+        templateEngine = new TemplateEngine();
+
+        Map<String, String> values = new HashMap<>();
+        values.put("#{male}",maleValue);
+        values.put("#{female}",femaleValue);
+
+        String generatedMessage = templateEngine.generateMessage(template, values);
+        assertEquals(messageExpected, generatedMessage, "Message generated is not as the expected");
+    }
+
 }

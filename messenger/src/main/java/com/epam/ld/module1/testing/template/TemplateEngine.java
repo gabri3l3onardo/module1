@@ -19,15 +19,24 @@ public class TemplateEngine {
      * @return the string
      */
     public String generateMessage(Template template, Map<String, String> values) {
+        String fakePlaceholderMark = "<not-placeholder>";
+        String placeholderPrefix = "#{";
         String templateWithValues = template.getBody();
         // Validating values...
         validateValuesForTemplate(template, values);
 
         // Replacing placeholders with values...
         for(String key: values.keySet()){
-            templateWithValues = templateWithValues.replace(key,values.get(key).toString());
+            String valueForVariable = values.get(key);
+            // Adding a mark for value in format '#{...}', for avoid it as placeholder
+            if(valueForVariable.matches("#\\{[^(#{)]*}")){
+                valueForVariable = valueForVariable.replace(placeholderPrefix,fakePlaceholderMark);
+            }
+            templateWithValues = templateWithValues.replace(key,valueForVariable);
         }
-        return templateWithValues;
+
+        // Removing mark for fake placeholders...
+        return templateWithValues.replace(fakePlaceholderMark,placeholderPrefix);
     }
 
     /**
