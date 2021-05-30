@@ -65,4 +65,26 @@ public class TemplateEngineTest {
         assertTrue(noValueException.getMessage().contains("Exist at least one null value"));
     }
 
+    @ParameterizedTest
+    //CSV columns: #{date}, #{male}, #{color}, #{female}, expected message
+    @CsvSource({
+            "5.30.2021, JOHN, blue, JANE, 'Today 5.30.2021, this test message was sent to JANE. Nice weekend'",
+            "6.1.2021, PETER, red, KATRINA, 'Today 6.1.2021, this test message was sent to KATRINA. Nice weekend'",
+            "5.30.2021, JOHN, , JANE, 'Today 5.30.2021, this test message was sent to JANE. Nice weekend'",
+            "6.1.2021, , , KATRINA, 'Today 6.1.2021, this test message was sent to KATRINA. Nice weekend'"
+    })
+    public void testGeneratorIgnoresValuesForVariablesNotFoundedInTemplate(String dateValue, String maleValue, String colorValue, String femaleValue, String messageExpected) {
+        template = new Template("Today #{date}, this test message was sent to #{female}. Nice weekend","#{date}","#{female}");
+        templateEngine = new TemplateEngine();
+
+        Map<String, String> values = new HashMap<>();
+        values.put("#{date}",dateValue);
+        values.put("#{male}",maleValue);
+        values.put("#{color}",colorValue);
+        values.put("#{female}",femaleValue);
+
+        String generatedMessage = templateEngine.generateMessage(template, values);
+        assertEquals(messageExpected, generatedMessage, "Message generated is not as the expected");
+    }
+
 }
