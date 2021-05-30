@@ -24,7 +24,7 @@ public class TemplateEngineTest {
             "PETER, KATRINA, 'This is a test message for PETER from KATRINA. Thanks in advance'"
     })
     public void testPlaceholdersReplacementWithValuesNoTemplatesSpecialChars(String maleValue, String femaleValue, String messageExpected) {
-        template = new Template("This is a test message for #{male} from #{female}. Thanks in advance");
+        template = new Template("This is a test message for #{male} from #{female}. Thanks in advance","#{male}","#{female}");
         templateEngine = new TemplateEngine();
 
         Map<String, String> values = new HashMap<>();
@@ -33,6 +33,36 @@ public class TemplateEngineTest {
 
         String generatedMessage = templateEngine.generateMessage(template, values);
         assertEquals(messageExpected, generatedMessage, "Message generated is not as the expected");
+    }
+
+    @ParameterizedTest
+    //CSV columns: #{male}, #{female}
+    @CsvSource({
+            "JOHN, ",
+            ", KATRINA"
+    })
+    public void testExceptionThrowForAtLeastOneValueNotProvided(String maleValue, String femaleValue) {
+        template = new Template("This is a test message for #{male} from #{female}. Thanks in advance","#{male}","#{female}");
+        templateEngine = new TemplateEngine();
+        // When variables are not sent...
+        Map<String, String> notNullvalues = new HashMap<>();
+        if(maleValue!=null){
+            notNullvalues.put("#{male}",maleValue);
+        }
+        if(femaleValue!=null){
+            notNullvalues.put("#{female}",femaleValue);
+        }
+
+        Exception noValueException = assertThrows(IllegalArgumentException.class, ()->templateEngine.generateMessage(template, notNullvalues));
+        assertTrue(noValueException.getMessage().contains("There are not present all variables"));
+
+        // When variables are sent, but with null values...
+        Map<String, String> withNullValues = new HashMap<>();
+        withNullValues.put("#{male}",maleValue);
+        withNullValues.put("#{female}",femaleValue);
+
+        noValueException = assertThrows(IllegalArgumentException.class, ()->templateEngine.generateMessage(template, withNullValues));
+        assertTrue(noValueException.getMessage().contains("Exist at least one null value"));
     }
 
 }
