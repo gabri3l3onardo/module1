@@ -8,6 +8,8 @@ import com.epam.ld.module1.testing.template.Template;
 import com.epam.ld.module1.testing.template.TemplateEngine;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,8 +38,10 @@ public class MessengerTest {
     public @interface ConsoleMode {
     }
 
+    // Assuming a specific behavior on Windows for files management...
     @Target({ ElementType.TYPE, ElementType.METHOD })
     @Retention(RetentionPolicy.RUNTIME)
+    @EnabledOnOs(OS.WINDOWS)
     @Tag("file")
     public @interface FileMode {
     }
